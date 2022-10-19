@@ -41,3 +41,4 @@ make
 ## Resources + Referenced Projects
 
 - https://github.com/slembcke/neslib-template
+- https://github.com/sebastiandine/openNES-Snake

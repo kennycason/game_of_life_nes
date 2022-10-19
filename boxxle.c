@@ -1,98 +1,158 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include <stdlib.h>
 #include <string.h>
-
 #include <joystick.h>
-#include <nes.h>
 #include "lib/neslib/neslib.h"
 
-uint8_t i, ix, iy;
-uint8_t joy0;
+// general vars
+static uint8_t i, j;
+static uint8_t spr;
+static uint8_t joy0;
 
-const uint8_t PALETTE[] = {
-        0x0D, 0x20, 0x11, 0x01, // Unused.
-        0x0D, 0x00, 0x10, 0x20, // Star colors.
-        0x0D, 0x27, 0x07, 0x17, // Asteroid colors.
-        0x0D, 0x21, 0x21, 0x21, // Blue text.
+// map vars
+#define TILE_SIZE   16
+#define WIDTH       256
+#define HEIGHT      240
+#define TILES_X     WIDTH / TILE_SIZE
+#define TILES_Y     HEIGHT / TILE_SIZE
 
-        0x0D, 0x20, 0x11, 0x01, // P1 palette.
-        0x0D, 0x20, 0x17, 0x07, // P2 palette.
-        0x09, 0x06, 0x16, 0x19, // Enemy.
-        0x0D, 0x00, 0x10, 0x20, // Unused.
+static const uint8_t ALIVE = 1;
+static const uint8_t DEAD = 0;
+
+static uint8_t x, y;
+static uint8_t fg[TILES_Y][TILES_X] = { // map[y][x]
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
 };
+//static uint8_t *fg[TILES_Y][TILES_X] = &fg_data[0][0];
 
-static const char HEX[] = "0123456789ABCDEF";
+static uint8_t bg[TILES_Y][TILES_X] = { // map[y][x]
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 
-/*
-	This is something that I found useful for developing.
-	Draw a table of all the tiles or sprites so you can
-	look up their indexes easily.
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 
-	Also plays music because why not?
-*/
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
 
-void main (void) {
-    joy_install(joy_static_stddrv);
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+};
+//static uint8_t *bg[TILES_Y][TILES_X] = &bg_data[0][0];
+//static uint8_t **swap[TILES_Y][TILES_X];
+static uint8_t neighbors;
 
-    // Assign the two sprite atlasses to the sprites/tiles.
-    bank_bg(0);
-    bank_spr(1);
+uint8_t get(uint8_t x, uint8_t y) {
+    return fg[(y + TILES_Y) % TILES_Y][(x + TILES_X) % TILES_X];
+}
 
-    // Clear the sprite memory.
-    oam_clear();
+uint8_t count_alive_neighbors(uint8_t x, uint8_t y) {
+    return get(x - 1, y - 1) + get(x, y - 1) + get(x + 1, y - 1) +
+           get(x - 1, y) + get(x + 1, y) +
+           get(x - 1, y + 1) + get(x, y + 1) + get(x + 1, y + 1);
+}
 
-    // Turn off the PPU to make batch uploads to VRAM.
-    ppu_off(); {
-        // Copy the palette to VRAM.
-        pal_all(PALETTE);
-
-        // Set VRAM writes to increment to the right. (1 for down)
-        vram_inc(0);
-        // Set the start address to the first nametable.
-        vram_adr(NAMETABLE_A);
-        // Fill it with 0's.
-        vram_fill(0x00, 32*30);
-
-        // Set start address to tile (8, 6)
-        vram_adr(NTADR_A(8, 6));
-        // Draw horizontal axis labels.
-        for(i = 0; i < 16; ++i) vram_put(HEX[i]);
-
-        // Increment downwards and draw the vertical labels.
-        vram_inc(1);
-        vram_adr(NTADR_A(6, 8));
-        for(i = 0; i < 16; ++i) vram_put(HEX[i]);
-
-        // Draw the "pipes" around the table.
-        vram_adr(NTADR_A(7, 7));
-        vram_put(0x14);
-        vram_fill(0x0E, 16);
-        vram_inc(0);
-        vram_adr(NTADR_A(8, 7));
-        vram_fill(0x0B, 16);
-
-        // Loop over the table and draw the tiles.
-        for(iy = 0; iy < 16; ++iy){
-            vram_adr(NTADR_A(8, iy + 8));
-            for(ix = 0; ix < 16; ++ix){
-                vram_put((iy << 4) | ix);
+void randomize_map() {
+    for (y = 0; y < TILES_Y; y++) {
+        for (x = 0; x < TILES_X; x++) {
+            if (rand8() > 200) {
+                fg[y][x] = ALIVE;
+            } else {
+                fg[y][x] = DEAD;
             }
         }
-    } ppu_on_all();
+    }
+}
 
-    // Play some music because why not?
-    music_play(0);
+const uint8_t palSprites[16] = {
+        0x0f, 0x17, 0x27, 0x37,
+        0x0f, 0x11, 0x21, 0x31,
+        0x0f, 0x15, 0x25, 0x35,
+        0x0f, 0x19, 0x29, 0x39
+};
 
-    // Main loop.
-    while(true){
-        // Read the first player gamepad.
-        joy0 = joy_read(0);
+//void swap_layers(uint8_t ***a, uint8_t ***b) {
+//    uint8_t **swap = *a;
+//    *a = *b;
+//    *b = swap;
+//}
 
-        // If they press the A/B buttons, switch the character bank.
-        if(JOY_BTN_1(joy0)) bank_bg(0);
-        if(JOY_BTN_2(joy0)) bank_bg(1);
+void main(void) {
+    pal_spr(palSprites); // set palette for sprites
 
-        // Wait for the next frame.
-        ppu_wait_nmi();
+    ppu_on_all(); //enable rendering
+
+    randomize_map();
+
+    // music_play(0);
+
+    while (1) {
+        ppu_wait_frame();
+
+//        joy0 = joy_read(0);
+//        if (JOY_BTN_1(joy0)) {
+//         //   balls_count--;
+//        }
+//        if (JOY_BTN_2(joy0)) {
+//         //   balls_count++;
+//        }
+
+        for (y = 0; y < TILES_Y; y++) {
+            for (x = 0; x < TILES_X; x++) {
+                neighbors = get(x, y);
+                if (fg[y][x] == ALIVE) {
+                    // 1. Any live cell with fewer than two live neighbors dies, as if caused by underpopulation.
+                    // 2. Any live cell with more than three live neighbors dies, as if by overcrowding.
+                    if (neighbors < 2 || neighbors > 3) {
+                        bg[y][x] = DEAD;
+                    } else {
+                        bg[y][x] = ALIVE;
+                    }
+                    // 3. Any live cell with two or three live neighbors lives on to the next generation.
+                } else {
+                    // 4. Any dead cell with exactly three live neighbors becomes a live cell.
+                    if (neighbors == 3) {
+                        bg[y][x] = ALIVE;
+                    } else {
+                        bg[y][x] = DEAD;
+                    }
+                }
+            }
+        }
+
+        //swap_layers(fg, bg);
+
+        for (y = 0; y < TILES_Y; y++) {
+            for (x = 0; x < TILES_X; x++) {
+                if (fg[y][x] == ALIVE) {
+                    spr = oam_spr(x * TILE_SIZE, y * TILE_SIZE, 0x40, 1, spr); // 0x40 is tile number, 1 is palette
+                }
+            }
+        }
     }
 }
