@@ -10,13 +10,14 @@ CFLAGS = -t nes -Oirs
 
 INCLUDE = $(CC65_ROOT)/include
 ASMINC = $(CC65_ROOT)/libsrc/nes
+CONFIG = config/ld65.cfg
 
 SRC = ${PROJECT_NAME}.c
 ASMSRC = lib/neslib/crt0.s
 OBJS = $(ASMSRC:.s=.o) $(SRC:.c=.o) chr_rom.o
 
-$(ROM): config/ld65.cfg $(OBJS)
-	$(LD) -C config/ld65.cfg $(OBJS) nes.lib -m link.log -o ${PROJECT_NAME}.nes
+$(ROM): $(CONFIG) $(OBJS)
+	$(LD) -C $(CONFIG) $(OBJS) nes.lib -m link.log -o ${PROJECT_NAME}.nes
 
 clean:
 	rm -f $(OBJS)
