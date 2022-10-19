@@ -38,6 +38,6 @@ make
 ```
 
 
-## Resources + References
+## Resources + Referenced Projects
 
-I've been 
+- https://github.com/slembcke/neslib-template
