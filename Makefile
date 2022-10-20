@@ -1,4 +1,4 @@
-PROJECT_NAME = boxxle
+PROJECT_NAME = game_of_life
 ROM = $(PROJECT_NAME).nes
 
 CC65_ROOT = tools/cc65

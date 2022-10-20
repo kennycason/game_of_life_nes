@@ -1,6 +1,10 @@
-# NES Boxxle
+# NES Dev
 
-NES version of Gameboy's Boxxle.
+Misc NES Projects
+
+## Programs:
+
+- Jon Conway's Game of Life
 
 
 ## Tools
@@ -42,3 +46,4 @@ make
 
 - https://github.com/slembcke/neslib-template
 - https://github.com/sebastiandine/openNES-Snake
+- http://shiru.untergrund.net/articles/programming_nes_games_in_c.htm
