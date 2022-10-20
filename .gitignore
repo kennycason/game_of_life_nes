@@ -5,7 +5,6 @@ tools/png2chr
 tools/chr2png
 tools/nsf2data
 tools/text2data
-tools/text2data
 tiles.chr
 sprites.chr
 a.out

@@ -18,17 +18,18 @@ static const uint8_t DEAD = 0;
 static const uint8_t DX = (WIDTH - (TILES_X * TILE_SIZE)) / 2;
 static const uint8_t DY = (HEIGHT - (TILES_Y * TILE_SIZE)) / 2;
 
+static uint8_t frame = 0;
 static uint8_t x, y;
 static uint8_t layers[2][TILES_Y][TILES_X] = {
         {
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -69,7 +70,7 @@ uint8_t count_alive_neighbors(uint8_t x, uint8_t y) {
 void randomize_map() {
     for (y = 0; y < TILES_Y; y++) {
         for (x = 0; x < TILES_X; x++) {
-            if (rand8() > 215) {
+            if (rand8() > 190) {
                 layers[fg_layer][y][x] = ALIVE;
             } else {
                 layers[fg_layer][y][x] = DEAD;
@@ -111,9 +112,13 @@ void main(void) {
 
     ppu_on_all();           // enable rendering
 
+    //music_play(0);
+
     while (1) {
         ppu_wait_frame();
 //        ppu_wait_nmi();
+
+        // render
 //        for (y = 0; y < TILES_Y; ++y) {
 //            for (x = 0; x < TILES_X; ++x) {
 //                if (layers[fg_layer][y][x] > 0) {
@@ -130,8 +135,10 @@ void main(void) {
                     // 1. Any live cell with fewer than two live neighbors dies, as if caused by underpopulation.
                     // 2. Any live cell with more than three live neighbors dies, as if by overcrowding.
                     if (neighbors < 2 || neighbors > 3) {
+                        if (layers[bg_layer][y][x] == ALIVE) { // only clean up if needed
+                            spr = oam_spr(DX + x * TILE_SIZE, DY + y * TILE_SIZE + 8, 0, 0, spr); // clean up tile
+                        }
                         layers[bg_layer][y][x] = DEAD;
-                        spr = oam_spr(DX + x * TILE_SIZE, DY + y * TILE_SIZE + 8, 0, 0, spr); // clean up tile
                     } else {
                         layers[bg_layer][y][x] = ALIVE;
                         spr = oam_spr(DX + x * TILE_SIZE, DY + y * TILE_SIZE + 8, layers[bg_layer][y][x], neighbors, spr); // 0x40 is tile number, 1 is palette
@@ -143,15 +150,21 @@ void main(void) {
                         layers[bg_layer][y][x] = ALIVE;
                         spr = oam_spr(DX + x * TILE_SIZE, DY + y * TILE_SIZE + 8, layers[bg_layer][y][x], neighbors, spr); // 0x40 is tile number, 1 is palette
                     } else {
+                        if (layers[bg_layer][y][x] == ALIVE) { // only clean up if needed
+                            spr = oam_spr(DX + x * TILE_SIZE, DY + y * TILE_SIZE + 8, 0, 0, spr); // clean up tile
+                        }
                         layers[bg_layer][y][x] = DEAD;
-//                        spr = oam_spr(DX + x * TILE_SIZE, DY + y * TILE_SIZE + 8, 0, 0, spr); // clean up tile
                     }
                 }
 
             }
         }
 
-        swap_layers();
+        if (frame % 4 == 0) {
+            swap_layers();
+        }
+
+        ++frame;
     }
 }
 

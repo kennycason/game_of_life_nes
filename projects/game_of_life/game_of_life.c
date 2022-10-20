@@ -22,15 +22,15 @@ static uint8_t x, y;
 static uint8_t layers[2][TILES_Y][TILES_X] = {
         {
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
-                {0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
-                {0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 1, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0},
-                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0},
-                {0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
-                {0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0},
-                {0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0},
-                {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
                 {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
@@ -62,7 +62,7 @@ uint8_t get(uint8_t x, uint8_t y) {
 
 uint8_t count_alive_neighbors(uint8_t x, uint8_t y) {
     return get(x - 1, y - 1) + get(x, y - 1) + get(x + 1, y - 1) +
-           get(x - 1, y)     + /*        */    get(x + 1, y) +
+           get(x - 1, y) + get(x + 1, y) +
            get(x - 1, y + 1) + get(x, y + 1) + get(x + 1, y + 1);
 }
 
@@ -114,14 +114,14 @@ void main(void) {
     while (1) {
         ppu_wait_frame();
 //        ppu_wait_nmi();
-        for (y = 0; y < TILES_Y; ++y) {
-            for (x = 0; x < TILES_X; ++x) {
-                if (layers[fg_layer][y][x] > 0) {
-                    neighbors = count_alive_neighbors(x, y);
-                    spr = oam_spr(DX + x * TILE_SIZE, DY + y * TILE_SIZE + 8, layers[fg_layer][y][x], neighbors, spr); // 0x40 is tile number, 1 is palette
-                }
-            }
-        }
+//        for (y = 0; y < TILES_Y; ++y) {
+//            for (x = 0; x < TILES_X; ++x) {
+//                if (layers[fg_layer][y][x] > 0) {
+//                    neighbors = count_alive_neighbors(x, y);
+//                    spr = oam_spr(DX + x * TILE_SIZE, DY + y * TILE_SIZE + 8, layers[fg_layer][y][x], neighbors, spr); // 0x40 is tile number, 1 is palette
+//                }
+//            }
+//        }
 
         for (y = 0; y < TILES_Y; ++y) {
             for (x = 0; x < TILES_X; ++x) {
@@ -134,19 +134,44 @@ void main(void) {
                         spr = oam_spr(DX + x * TILE_SIZE, DY + y * TILE_SIZE + 8, 0, 0, spr); // clean up tile
                     } else {
                         layers[bg_layer][y][x] = ALIVE;
+                        spr = oam_spr(DX + x * TILE_SIZE, DY + y * TILE_SIZE + 8, layers[bg_layer][y][x], neighbors, spr); // 0x40 is tile number, 1 is palette
                     }
                     // 3. Any live cell with two or three live neighbors lives on to the next generation.
                 } else {
                     // 4. Any dead cell with exactly three live neighbors becomes a live cell.
                     if (neighbors == 3) {
                         layers[bg_layer][y][x] = ALIVE;
+                        spr = oam_spr(DX + x * TILE_SIZE, DY + y * TILE_SIZE + 8, layers[bg_layer][y][x], neighbors, spr); // 0x40 is tile number, 1 is palette
                     } else {
                         layers[bg_layer][y][x] = DEAD;
+//                        spr = oam_spr(DX + x * TILE_SIZE, DY + y * TILE_SIZE + 8, 0, 0, spr); // clean up tile
                     }
                 }
+
             }
         }
 
         swap_layers();
     }
 }
+
+
+/*
+
+ Still tiles
+         {
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 1, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
+                {0, 1, 1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0},
+                {0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 0},
+                {0, 1, 0, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0},
+                {0, 0, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                {0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        },
+ */
