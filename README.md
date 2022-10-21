@@ -17,6 +17,12 @@ Programmed in C using NES Lib.
 #### Random
 <img src="https://github.com/kennycason/game_of_life_nes/blob/main/output/image/game_of_life_2_1.png?raw=true" width="25%" title="Random"/><img src="https://github.com/kennycason/game_of_life_nes/blob/main/output/image/game_of_life_2_2.png?raw=true" width="25%" title="Random"/><img src="https://github.com/kennycason/game_of_life_nes/blob/main/output/image/game_of_life_2_3.png?raw=true" width="25%" title="Random"/><img src="https://github.com/kennycason/game_of_life_nes/blob/main/output/image/game_of_life_2_4.png?raw=true" width="25%" title="Random"/><img src="https://github.com/kennycason/game_of_life_nes/blob/main/output/image/game_of_life_2_5.png?raw=true" width="25%" title="Random"/><img src="https://github.com/kennycason/game_of_life_nes/blob/main/output/image/game_of_life_2_6.png?raw=true" width="25%" title="Random"/><img src="https://github.com/kennycason/game_of_life_nes/blob/main/output/image/game_of_life_2_7.png?raw=true" width="25%" title="Random"/>
 
+#### NES ROMs
+- [Game of Life - Random](https://github.com/kennycason/game_of_life_nes/blob/main/output/nes/game_of_life_random.nes?raw=true)
+- [Game of Life - Glider](https://github.com/kennycason/game_of_life_nes/blob/main/output/nes/game_of_life_glider.nes?raw=true)
+- [Game of Life - Pinwheel](https://github.com/kennycason/game_of_life_nes/blob/main/output/nes/game_of_life_pinwheel.nes?raw=true)
+- [Game of Life - Pulsar](https://github.com/kennycason/game_of_life_nes/blob/main/output/nes/game_of_life_pulsar.nes?raw=true)
+
 Notes:
 - NES limits the number of tiles that can be rendered to the screen. This causes some tiles to disappear between renders. The state is still preserved.
 - V2 will use VRAM for better graphics performance.
