@@ -8,6 +8,10 @@ Programmed in C using NES Lib.
 #### Pulsar
 <img src="https://github.com/kennycason/game_of_life_nes/blob/main/output/image/game_of_life_pulsar_1.png?raw=true" width="33%" title="Pulsar"/><img src="https://github.com/kennycason/game_of_life_nes/blob/main/output/image/game_of_life_pulsar_2.png?raw=true" width="33%" title="Pulsar"/><img src="https://github.com/kennycason/game_of_life_nes/blob/main/output/image/game_of_life_pulsar_3.png?raw=true" width="33%" title="Pulsar"/>
 
+#### Glider
+<img src="https://github.com/kennycason/game_of_life_nes/blob/main/output/image/game_of_life_glider_1.png?raw=true" width="20%" title="Glider"/><img src="https://github.com/kennycason/game_of_life_nes/blob/main/output/image/game_of_life_glider_2.png?raw=true" width="20%" title="Glider"/><img src="https://github.com/kennycason/game_of_life_nes/blob/main/output/image/game_of_life_glider_3.png?raw=true" width="20%" title="Glider"/><img src="https://github.com/kennycason/game_of_life_nes/blob/main/output/image/game_of_life_glider_4.png?raw=true" width="20%" title="Glider"/><img src="https://github.com/kennycason/game_of_life_nes/blob/main/output/image/game_of_life_glider_5.png?raw=true" width="20%" title="Glider"/>
+
+
 Notes:
 - NES limits the number of tiles that can be rendered to the screen. This causes some tiles to disappear between renders. The state is still preserved.
 - V2 will use VRAM for better graphics performance.
