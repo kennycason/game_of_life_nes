@@ -33,7 +33,7 @@ Notes:
 
 #### Checkout the cc65 submodule
 ```
-git submodule update --init --recursive`
+git submodule update --init --recursive
 ```
 
 #### Build cc65
