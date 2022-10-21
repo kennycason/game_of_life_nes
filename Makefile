@@ -34,7 +34,7 @@ clean:
 %.chr: %.png
 	tools/png2chr $<
 
-chr_rom.o: tiles.chr sprites.chr
+chr_rom.o: tiles.chr
 
 # Cancel built in rule for .c files.
 %.o: %.c

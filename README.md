@@ -1,11 +1,4 @@
-# NES Dev
-
-Misc NES Projects
-
-## Programs:
-
-- Jon Conway's Game of Life
-
+# NES - Jon Conway's Game of Life
 
 ## Tools
 
@@ -15,9 +8,7 @@ Misc NES Projects
 - nsf2data
 - test2data
 
-
 ### Build Toolchain + NES File
-
 
 #### Checkout the cc65 submodule
 ```
@@ -41,9 +32,14 @@ make
 make
 ```
 
+#### Open NES ROM with FCEUX NES Emulator
+```
+fceux game_of_life.nes
+```
 
 ## Resources + Referenced Projects
 
 - https://github.com/slembcke/neslib-template
 - https://github.com/sebastiandine/openNES-Snake
 - http://shiru.untergrund.net/articles/programming_nes_games_in_c.htm
+- https://nesdoug.com/
