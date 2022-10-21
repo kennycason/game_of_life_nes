@@ -1,4 +1,4 @@
-# NES - Jon Conway's Game of Life
+# NES - John Conway's Game of Life
 
 Programmed in C using NES Lib.
 
