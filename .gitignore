@@ -1,5 +1,4 @@
 *.o
-*.s
 link.log
 tools/png2chr
 tools/chr2png

@@ -1,0 +1,14 @@
+intra_quant_bias = 0 inter_quant_bias = -64
+Using s16p internally between filters
+Output #0, avi, to '/Users/kenny/.fceux/avi/game_of_life.avi':
+  Stream #0:0, 0, 1000/60099: Video: mpeg4, yuv420p, 256x224, q=2-31, 400 kb/s, 60.10 tbn
+  Stream #0:1, 0, 1/44100: Audio: mp3, 44100 Hz, mono, s32p, 64 kb/s
+Setting default whitelist 'file,crypto,data'
+Opened file for writing: /Users/kenny/.fceux/avi/game_of_life.avi
+reserve_index_space:0 master_index_max_size:256
+duration_est:36000.000, filesize_est:2.1GiB, master_index_max_size:256
+AVI Record Disk Thread Start
+Avg Audio Sample Rate per Frame: 734 
+Trying to remove 618 more samples than there are in the queue
+Statistics: 4382950 bytes written, 10 seeks, 25 writeouts
+AVI Record Disk Thread Exit

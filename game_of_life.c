@@ -5,6 +5,7 @@
 
 // general vars
 static uint8_t spr;
+static uint8_t input;
 
 // map vars
 #define WIDTH       256
@@ -18,7 +19,7 @@ static const uint8_t DEAD = 0;
 static const uint8_t DX = (WIDTH - (TILES_X * TILE_SIZE)) / 2;
 static const uint8_t DY = (HEIGHT - (TILES_Y * TILE_SIZE)) / 2;
 
-static uint8_t i, frame = 0;
+static uint8_t i, frame = 0, paused = 0;
 static uint8_t x, y;
 
 static uint8_t fg_layer = 0;
@@ -152,66 +153,85 @@ static void swap_layers() {
     fg_layer = !fg_layer;
 }
 
+static void handle_input() {
+    input = pad_trigger(0);
+
+    if (input & PAD_A + input & PAD_B) {
+        randomize_map();
+    }
+    if (input & PAD_START) {
+        paused = !paused;
+    }
+}
+
+static compute_next_state() {
+    for (y = 0; y < TILES_Y; y++) {
+        for (x = 0; x < TILES_X; x++) {
+            neighbors = count_alive_neighbors(x, y);
+            next_state = layers[fg_layer][y][x]; // default to carry over state
+            if (layers[fg_layer][y][x] == ALIVE) {
+                // 1. Any live cell with fewer than two live neighbors dies, as if caused by underpopulation.
+                // 2. Any live cell with more than three live neighbors dies, as if by overcrowding.
+                if (neighbors < 2 || neighbors > 3) {
+                    next_state = DEAD;
+
+                }
+                    // 3. Any live cell with two or three live neighbors lives on to the next generation.
+                else {
+                    next_state = ALIVE;
+                }
+            } else {
+                // 4. Any dead cell with exactly three live neighbors becomes a live cell.
+                if (neighbors == 3) {
+                    next_state = ALIVE;
+                }
+                    // 5. Else cell remains dead.
+                else {
+                    next_state = DEAD;
+                }
+            }
+
+            layers[bg_layer][y][x] = next_state;
+        }
+    }
+}
+
+static render() {
+    oam_clear();
+    spr = 0;
+    for (y = 0; y < TILES_Y; ++y) {
+        for (x = 0; x < TILES_X; ++x) {
+            if (layers[fg_layer][y][x] == ALIVE) {
+                neighbors = count_alive_neighbors(x, y);
+                spr = oam_spr(DX + x * TILE_SIZE, DY + y * TILE_SIZE + 8, layers[fg_layer][y][x], neighbors, spr);
+            }
+        }
+    }
+}
+
 void main(void) {
-   randomize_map();
+   //randomize_map();
    //build_glider();
-   //start_pinwheel();
+   start_pinwheel();
    //start_pulsar();
 
-    pal_spr(sprites_pal);    // set palette for sprites
+    pal_spr(sprites_pal);   // set palette for sprites
     ppu_on_all();           // enable rendering
 
-
     while (1) {
-        ppu_wait_frame();
+        ppu_wait_frame();   // wait for next TV frame
 
-        // compute next state
-        for (y = 0; y < TILES_Y; y++) {
-            for (x = 0; x < TILES_X; x++) {
-                neighbors = count_alive_neighbors(x, y);
-                next_state = layers[fg_layer][y][x]; // default to carry over state
-                if (layers[fg_layer][y][x] == ALIVE) {
-                    // 1. Any live cell with fewer than two live neighbors dies, as if caused by underpopulation.
-                    // 2. Any live cell with more than three live neighbors dies, as if by overcrowding.
-                    if (neighbors < 2 || neighbors > 3) {
-                        next_state = DEAD;
+        handle_input();
 
-                    }
-                    // 3. Any live cell with two or three live neighbors lives on to the next generation.
-                    else {
-                        next_state = ALIVE;
-                    }
-                } else {
-                    // 4. Any dead cell with exactly three live neighbors becomes a live cell.
-                    if (neighbors == 3) {
-                        next_state = ALIVE;
-                    }
-                    // 5. Else cell remains dead.
-                    else {
-                        next_state = DEAD;
-                    }
-                }
-
-                layers[bg_layer][y][x] = next_state;
-            }
+        if (!paused && frame % 2 == 0) {
+            compute_next_state();
         }
 
+        render();
 
-        // render
-        oam_clear();
-        spr = 0;
-        for (y = 0; y < TILES_Y; ++y) {
-            for (x = 0; x < TILES_X; ++x) {
-                if (layers[fg_layer][y][x] == ALIVE) {
-                    neighbors = count_alive_neighbors(x, y);
-                    spr = oam_spr(DX + x * TILE_SIZE, DY + y * TILE_SIZE + 8, layers[fg_layer][y][x], neighbors, spr);
-                }
-            }
+        if (!paused && frame % 2 == 0) {
+            swap_layers();
         }
-
-        ppu_wait_nmi();
-
-        swap_layers();
 
         ++frame;
     }
